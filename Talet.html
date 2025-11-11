@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Minh Họa Đa Tầng: Nồng Độ Trộn • Xác Suất Toàn Phần • Định Lý Thales</title>
+  <style>
+    :root {
+      --bg: #0f1724;
+      --panel: #0b1220;
+      --accent: #38bdf8;
+      --muted: #94a3b8;
+      --yellow: #facc15;
+      --orange: #f97316;
+      --green: #22c55e;
+      --purple: #c084fc;
+      --pink: #f472b6;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+      background: linear-gradient(180deg, #071020, #071526);
+      color: #e6eef8;
+    }
+    .wrap {
+      max-width: 1080px;
+      margin: 24px auto;
+      padding: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius: 16px;
+      box-shadow: 0 8px 36px rgba(2,6,23,0.8);
+    }
+    header h1 {
+      font-size: 23px;
+      margin: 0;
+      color: var(--accent);
+      font-weight: 600;
+    }
+    p.lead {
+      color: var(--muted);
+      margin: 10px 0 18px;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .content {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 22px;
+    }
+    .canvas-wrap {
+      background: linear-gradient(180deg, #071826, rgba(7,20,38,0.3));
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: inset 0 2px 10px rgba(0,0,0,0.4);
+    }
+    svg {
+      width: 100%;
+      height: 560px;
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent);
+    }
+    .controls {
+      padding: 16px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    }
+    label {
+      display: block;
+      font-size: 13.8px;
+      color: var(--muted);
+      margin-top: 12px;
+      font-weight: 500;
+    }
+    input[type=range] {
+      width: 100%;
+      accent-color: var(--accent);
+    }
+    .row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+    }
+    .small {
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .values {
+      margin-top: 16px;
+      background: rgba(255,255,255,0.015);
+      padding: 14px;
+      border-radius: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13.5px;
+      line-height: 1.8;
+      white-space: pre;
+      color: #e0f2fe;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .legend .item {
+      display: flex;
+      gap: 7px;
+      align-items: center;
+      font-size: 13.2px;
+    }
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+    }
+    .btn {
+      padding: 8px 14px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      font-size: 13.5px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: rgba(255,255,255,0.12);
+      border-color: var(--accent);
+    }
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin: 20px 0;
+      padding: 4px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      width: fit-content;
+    }
+    .tab {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      background: var(--accent);
+      color: #0f1724;
+      font-weight: 600;
+    }
+    .tab:not(.active):hover {
+      background: rgba(255,255,255,0.1);
+    }
+    .explanation {
+      margin-top: 24px;
+      padding: 18px;
+      background: rgba(255,255,255,0.025);
+      border-radius: 12px;
+      font-size: 14.2px;
+      line-height: 1.8;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .explanation h2 {
+      font-size: 17px;
+      margin: 0 0 12px;
+      color: var(--yellow);
+    }
+    .explanation h3 {
+      font-size: 15.5px;
+      margin: 18px 0 10px;
+      color: var(--accent);
+    }
+    .explanation ul {
+      margin: 10px 0;
+      padding-left: 24px;
+    }
+    .explanation li {
+      margin: 7px 0;
+    }
+    .math {
+      font-family: 'Times New Roman', serif;
+      font-style: italic;
+      color: var(--yellow);
+      background: rgba(250, 204, 21, 0.12);
+      padding: 3px 7px;
+      border-radius: 5px;
+    }
+    .formula {
+      background: rgba(56, 189, 248, 0.12);
+      padding: 12px;
+      border-radius: 8px;
+      border-left: 4px solid var(--accent);
+      margin: 12px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 14.5px;
+      line-height: 1.7;
+    }
+    .note {
+      font-size: 13.5px;
+      color: var(--green);
+      font-style: italic;
+      margin-top: 8px;
+    }
+    footer {
+      margin-top: 20px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Minh Họa Đa Tầng: Nồng Độ Trộn • Xác Suất Toàn Phần • Định Lý Thales</h1>
+    </header>
+    <p class="lead">
+      <strong>Điểm P</strong> đồng thời là:
+      <br>• <strong>Nồng độ hỗn hợp</strong> khi trộn 2 bình nước muối
+      <br>• <strong>Xác suất toàn phần</strong> P(A) từ 2 nguồn tin M1, M2
+      <br>• <strong>Vị trí cân bằng có trọng số</strong> trên đoạn MN
+      <br>Khi <code>k = l</code> → MN ∥ BC → minh họa <strong>định lý Thales</strong>.
+    </p>
+
+    <!-- Tabs chọn chế độ giải thích -->
+    <div class="tabs">
+      <div class="tab active" data-mode="salt">Nồng Độ Nước Muối</div>
+      <div class="tab" data-mode="prob">Xác Suất Toàn Phần</div>
+      <div class="tab" data-mode="thales">Định Lý Thales</div>
+    </div>
+
+    <div class="content">
+      <!-- Canvas -->
+      <div class="canvas-wrap">
+        <svg id="svg" viewBox="0 0 700 560" preserveAspectRatio="xMidYMid meet">
+          <defs>
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="4.5" result="b"/>
+              <feMerge>
+                <feMergeNode in="b"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+          <g id="scene"></g>
+        </svg>
+      </div>
+
+      <!-- Controls -->
+      <aside class="controls">
+        <label id="kLabel">Nồng độ M1 = k/(k+1): <strong id="kVal">1.00</strong></label>
+        <input id="k" type="range" min="0.1" max="8" step="0.01" value="1">
+
+        <label id="lLabel">Nồng độ M2 = l/(l+1): <strong id="lVal">1.00</strong></label>
+        <input id="l" type="range" min="0.1" max="8" step="0.01" value="1">
+
+        <label id="bLabel">Kích thước M1 ~ |AB|: <strong id="bVal">580</strong></label>
+        <input id="bSlider" type="range" min="200" max="650" step="1" value="580">
+
+        <label id="cLabel">Kích thước M2 ~ |AC|: <strong id="cVal">80</strong></label>
+        <input id="cSlider" type="range" min="40" max="240" step="1" value="80">
+
+        <div class="row">
+          <div class="small">Trọng số:</div>
+          <div><button id="toggleWeight" class="btn">Theo độ dài (mặc định)</button></div>
+        </div>
+
+        <div class="values" id="vals"></div>
+
+        <div class="legend">
+          <div class="item"><div class="swatch" style="background:#38bdf8"></div><div class="small">AB (M1)</div></div>
+          <div class="item"><div class="swatch" style="background:#60a5fa"></div><div class="small">AC (M2)</div></div>
+          <div class="item"><div class="swatch" style="background:var(--orange)"></div><div class="small">M, N</div></div>
+          <div class="item"><div class="swatch" style="background:var(--yellow)"></div><div class="small">P (Kết quả)</div></div>
+          <div class="item"><div class="swatch" style="background:var(--green)"></div><div class="small">BC</div></div>
+        </div>
+
+        <footer>Thay đổi các giá trị để thấy P thay đổi theo cả 2 mô hình</footer>
+      </aside>
+    </div>
+
+    <!-- Giải thích theo tab -->
+    <div class="explanation" id="explanation">
+      <!-- Nội dung sẽ được JS thay đổi -->
+    </div>
+  </div>
+
+<script>
+(function(){
+  const svg = document.getElementById('svg');
+  const scene = document.getElementById('scene');
+  const kInput = document.getElementById('k');
+  const lInput = document.getElementById('l');
+  const bSlider = document.getElementById('bSlider');
+  const cSlider = document.getElementById('cSlider');
+  const kVal = document.getElementById('kVal');
+  const lVal = document.getElementById('lVal');
+  const bVal = document.getElementById('bVal');
+  const cVal = document.getElementById('cVal');
+  const valsBox = document.getElementById('vals');
+  const toggleBtn = document.getElementById('toggleWeight');
+  const tabs = document.querySelectorAll('.tab');
+  const explanation = document.getElementById('explanation');
+  const kLabel = document.getElementById('kLabel');
+  const lLabel = document.getElementById('lLabel');
+  const bLabel = document.getElementById('bLabel');
+  const cLabel = document.getElementById('cLabel');
+
+  let weightMode = 'length';
+  let currentMode = 'salt';
+
+  // Tab switching
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentMode = tab.dataset.mode;
+      updateLabels();
+      updateExplanation();
+      render();
+    });
+  });
+
+  toggleBtn.addEventListener('click', () => {
+    weightMode = weightMode === 'length' ? 'equal' : 'length';
+    toggleBtn.textContent = weightMode === 'length' 
+      ? 'Theo độ dài (mặc định)' 
+      : 'Trọng số bằng nhau';
+    render();
+  });
+
+  function updateLabels() {
+    if (currentMode === 'salt') {
+      kLabel.innerHTML = 'Nồng độ M1 = k/(k+1): <strong id="kVal">1.00</strong>';
+      lLabel.innerHTML = 'Nồng độ M2 = l/(l+1): <strong id="lVal">1.00</strong>';
+      bLabel.innerHTML = 'Thể tích M1 ~ |AB|: <strong id="bVal">580</strong>';
+      cLabel.innerHTML = 'Thể tích M2 ~ |AC|: <strong id="cVal">80</strong>';
+    } else if (currentMode === 'prob') {
+      kLabel.innerHTML = 'P(A|M1) = k/(k+1): <strong id="kVal">1.00</strong>';
+      lLabel.innerHTML = 'P(A|M2) = l/(l+1): <strong id="lVal">1.00</strong>';
+      bLabel.innerHTML = 'P(M1) ~ |AB|: <strong id="bVal">580</strong>';
+      cLabel.innerHTML = 'P(M2) ~ |AC|: <strong id="cVal">80</strong>';
+    } else {
+      kLabel.innerHTML = 'Tỉ số AM/MB = k: <strong id="kVal">1.00</strong>';
+      lLabel.innerHTML = 'Tỉ số AN/NC = l: <strong id="lVal">1.00</strong>';
+      bLabel.innerHTML = 'Độ dài AB: <strong id="bVal">580</strong>';
+      cLabel.innerHTML = 'Độ dài AC: <strong id="cVal">80</strong>';
+    }
+  }
+
+  function updateExplanation() {
+    const templates = {
+      salt: `
+<h2>Nồng Độ Nước Muối Khi Trộn</h2>
+<p>Giả sử có 2 bình nước muối:</p>
+<ul>
+  <li><strong>Bình M1</strong>: Nồng độ = <span class="math">k/(k+1)</span>, thể tích ~ |AB|</li>
+  <li><strong>Bình M2</strong>: Nồng độ = <span class="math">l/(l+1)</span>, thể tích ~ |AC|</li>
+</ul>
+<div class="formula">
+C = (C₁·V₁ + C₂·V₂) / (V₁ + V₂) = α_M·w1 + α_N·w2
+</div>
+<p>với <span class="math">w1 = |AB|/(|AB|+|AC|)</span>, <span class="math">w2 = |AC|/(|AB|+|AC|)</span></p>
+<h3>Kết quả: Điểm P là nồng độ hỗn hợp</h3>
+<p>P nằm trên MN, vị trí được tính bằng trung bình có trọng số → <strong>nồng độ sau khi trộn</strong>.</p>
+      `,
+      prob: `
+<h2>Công Thức Xác Suất Toàn Phần</h2>
+<p>Giả sử có 2 nguồn tin M1, M2 báo về sự kiện A:</p>
+<ul>
+  <li><strong>M1</strong>: P(A|M1) = <span class="math">k/(k+1)</span>, xác suất xảy ra ~ |AB|</li>
+  <li><strong>M2</strong>: P(A|M2) = <span class="math">l/(l+1)</span>, xác suất xảy ra ~ |AC|</li>
+</ul>
+<div class="formula">
+P(A) = P(A|M1)·P(M1) + P(A|M2)·P(M2) = α_M·w1 + α_N·w2
+</div>
+<p>với <span class="math">w1 = |AB|/(|AB|+|AC|)</span>, <span class="math">w2 = |AC|/(|AB|+|AC|)</span></p>
+<h3>Kết quả: Điểm P là xác suất toàn phần</h3>
+<p>P(A) được biểu diễn trực quan bằng vị trí P trên MN.</p>
+      `,
+      thales: `
+<h2>Định Lý Thales (Ta-lét)</h2>
+<p>Định lý: <em>Nếu một đường thẳng cắt hai cạnh của tam giác theo tỉ lệ bằng nhau, thì nó song song với cạnh thứ ba.</em></p>
+<div class="formula">
+AM/AB = AN/AC ⟺ k = l ⟺ MN ∥ BC
+</div>
+<p>Khi <code>k = l</code> → α_M = α_N → đoạn MN <strong>song song</strong> với BC.</p>
+<div class="note">Thử đặt k = l và quan sát: MN sẽ song song BC, và thông báo hiện lên!</div>
+      `
+    };
+    explanation.innerHTML = templates[currentMode];
+  }
+
+  function dist(p, q) { return Math.hypot(p.x - q.x, p.y - q.y); }
+
+  function makeSVG(tag, attrs) {
+    const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    return el;
+  }
+
+  function render() {
+    scene.innerHTML = '';
+    const A = { x: 120, y: 460 };
+    const B = { x: parseFloat(bSlider.value), y: 460 };
+    const C = { x: 160, y: parseFloat(cSlider.value) };
+    const k = parseFloat(kInput.value);
+    const l = parseFloat(lInput.value);
+
+    kVal.textContent = k.toFixed(2);
+    lVal.textContent = l.toFixed(2);
+    bVal.textContent = B.x.toFixed(0);
+    cVal.textContent = C.y.toFixed(0);
+
+    const AB = dist(A, B);
+    const AC = dist(A, C);
+    const alphaM = k / (k + 1);
+    const alphaN = l / (l + 1);
+
+    const M = { x: A.x + (B.x - A.x) * alphaM, y: A.y + (B.y - A.y) * alphaM };
+    const N = { x: A.x + (C.x - A.x) * alphaN, y: A.y + (C.y - A.y) * alphaN };
+
+    let w1, w2;
+    if (weightMode === 'length') {
+      w1 = AB / (AB + AC);
+      w2 = AC / (AB + AC);
+    } else {
+      w1 = w2 = 0.5;
+    }
+
+    const alphaP = w1 * alphaM + w2 * alphaN;
+
+    let t = Math.abs(alphaN - alphaM) < 1e-9 ? 0.5 : (alphaP - alphaM) / (alphaN - alphaM);
+    t = Math.max(0, Math.min(1, t));
+
+    const P = { x: M.x + (N.x - M.x) * t, y: M.y + (N.y - M.y) * t };
+
+    // Tam giác
+    scene.appendChild(makeSVG('line', { x1: A.x, y1: A.y, x2: B.x, y2: B.y, stroke: '#38bdf8', 'stroke-width': 3.5 }));
+    scene.appendChild(makeSVG('line', { x1: A.x, y1: A.y, x2: C.x, y2: C.y, stroke: '#60a5fa', 'stroke-width': 3.5 }));
+    scene.appendChild(makeSVG('line', { x1: B.x, y1: B.y, x2: C.x, y2: C.y, stroke: '#22c55e', 'stroke-width': 2.5, 'stroke-dasharray': '8 6' }));
+
+    // Điểm A, B, C
+    scene.appendChild(makeSVG('circle', { cx: A.x, cy: A.y, r: 5.5, fill: '#e2eefc' }));
+    scene.appendChild(makeSVG('text', { x: A.x + 12, y: A.y + 7, fill: '#dbeafe', 'font-size': 13.5 })).textContent = 'A (0)';
+
+    scene.appendChild(makeSVG('circle', { cx: B.x, cy: B.y, r: 5.5, fill: '#bfdbfe' }));
+    scene.appendChild(makeSVG('text', { x: B.x - 20, y: B.y + 7, fill: '#bfdbfe', 'font-size': 13.5 })).textContent = 'B (1)';
+
+    scene.appendChild(makeSVG('circle', { cx: C.x, cy: C.y, r: 5.5, fill: '#bfdbfe' }));
+    scene.appendChild(makeSVG('text', { x: C.x - 8, y: C.y - 12, fill: '#bfdbfe', 'font-size': 13.5 })).textContent = 'C (1)';
+
+    // M, N
+    scene.appendChild(makeSVG('circle', { cx: M.x, cy: M.y, r: 6.5, fill: '#f97316', class: 'dot' }));
+    scene.appendChild(makeSVG('text', { x: M.x + 12, y: M.y + 7, fill: '#ffd8c4', 'font-size': 13.5 })).textContent = `${alphaM.toFixed(3)}`;
+
+    scene.appendChild(makeSVG('circle', { cx: N.x, cy: N.y, r: 6.5, fill: '#f97316', class: 'dot' }));
+    scene.appendChild(makeSVG('text', { x: N.x + 12, y: N.y + 7, fill: '#ffd8c4', 'font-size': 13.5 })).textContent = `${alphaN.toFixed(3)}`;
+
+    // MN
+    scene.appendChild(makeSVG('line', { x1: M.x, y1: M.y, x2: N.x, y2: N.y, stroke: '#ffb78c', 'stroke-width': 4 }));
+
+    // P - Kết quả (nồng độ hoặc xác suất)
+    const pLabel = currentMode === 'salt' ? 'Nồng độ' : currentMode === 'prob' ? 'P(A)' : 'Giá trị';
+    scene.appendChild(makeSVG('circle', { cx: P.x, cy: P.y, r: 10, fill: '#facc15', stroke: '#d97706', 'stroke-width': 2.5, filter: 'url(#glow)' }));
+    scene.appendChild(makeSVG('text', { x: P.x + 14, y: P.y + 7, fill: '#fff8d2', 'font-size': 15, 'font-weight': 'bold' })).textContent = `${pLabel} = ${alphaP.toFixed(3)}`;
+
+    // Chiếu xuống AB
+    const proj = { x: A.x + (B.x - A.x) * alphaP, y: A.y + (B.y - A.y) * alphaP };
+    scene.appendChild(makeSVG('line', { x1: P.x, y1: P.y, x2: proj.x, y2: proj.y, stroke: '#94a3b8', 'stroke-width': 2, 'stroke-dasharray': '6 5' }));
+    scene.appendChild(makeSVG('circle', { cx: proj.x, cy: proj.y, r: 4.5, fill: '#94a3b8', opacity: 0.9 }));
+
+    // Thales
+    if (Math.abs(alphaM - alphaN) < 1e-6) {
+      const note = makeSVG('text', { x: 350, y: 45, fill: '#a7f3d0', 'font-size': 16, 'text-anchor': 'middle', 'font-weight': 'bold' });
+      note.textContent = 'k = l → MN ∥ BC (Định lý Thales)';
+      scene.appendChild(note);
+    }
+
+    // Bảng giá trị
+    const unit1 = currentMode === 'salt' ? 'Thể tích' : currentMode === 'prob' ? 'P(M1)' : 'Độ dài';
+    const unit2 = currentMode === 'salt' ? 'Thể tích' : currentMode === 'prob' ? 'P(M2)' : 'Độ dài';
+    const resultName = currentMode === 'salt' ? 'Nồng độ hỗn hợp' : currentMode === 'prob' ? 'Xác suất toàn phần' : 'Giá trị P';
+    valsBox.innerHTML = 
+`${currentMode === 'thales' ? 'Tỉ số' : 'Nồng độ/Prob'} M1: ${alphaM.toFixed(4)}
+${currentMode === 'thales' ? 'Tỉ số' : 'Nồng độ/Prob'} M2: ${alphaN.toFixed(4)}
+${unit1} M1: ${AB.toFixed(1)} → w1 = ${w1.toFixed(3)}
+${unit2} M2: ${AC.toFixed(1)} → w2 = ${w2.toFixed(3)}
+────────────────────────────────
+${resultName}: ${alphaP.toFixed(4)}`;
+
+  }
+
+  // Khởi tạo
+  updateLabels();
+  updateExplanation();
+  render();
+  [kInput, lInput, bSlider, cSlider].forEach(el => el.addEventListener('input', render));
+})();
+</script>
+</body>
+</html>
