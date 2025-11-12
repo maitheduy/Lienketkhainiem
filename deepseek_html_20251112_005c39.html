@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barnsley Fern Comparison - Vibrant Colors</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .comparison {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .fern-container {
+            flex: 1;
+            text-align: center;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+        canvas {
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 5px;
+            max-width: 100%;
+        }
+        .controls {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .slider-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #dee2e6;
+            outline: none;
+        }
+        .value-display {
+            display: inline-block;
+            margin-left: 10px;
+            font-weight: bold;
+            color: #007bff;
+            background: #e7f3ff;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        button {
+            padding: 12px 25px;
+            margin: 0 10px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        }
+        .info {
+            text-align: center;
+            color: #6c757d;
+            margin-top: 20px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .stats {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 0.9em;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .algorithm-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+        .comparison-title {
+            text-align: center;
+            font-weight: bold;
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+        .color-legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌿 Barnsley Fern Comparison - Vibrant Colors</h1>
+        <div class="subtitle">Classic vs Thales-Modified with New Color Scheme</div>
+        
+        <div class="color-legend">
+            <div class="color-item">
+                <div class="color-box" style="background-color: #22c55e;"></div>
+                <span>Green - Stem</span>
+            </div>
+            <div class="color-item">
+                <div class="color-box" style="background-color: #dc2626;"></div>
+                <span>Bright Red - Main Spiral</span>
+            </div>
+            <div class="color-item">
+                <div class="color-box" style="background-color: #7c3aed;"></div>
+                <span>Purple - Left Branches</span>
+            </div>
+            <div class="color-item">
+                <div class="color-box" style="background-color: #ea580c;"></div>
+                <span>Orange - Right Branches</span>
+            </div>
+        </div>
+        
+        <div class="comparison">
+            <div class="fern-container">
+                <div class="comparison-title">Classic Barnsley Fern</div>
+                <canvas id="classicCanvas" width="500" height="600"></canvas>
+                <div class="stats" id="classicStats">Points: 0 | Time: 0ms</div>
+            </div>
+            
+            <div class="fern-container">
+                <div class="comparison-title">Thales-Modified Fern</div>
+                <canvas id="thalesCanvas" width="500" height="600"></canvas>
+                <div class="stats" id="thalesStats">Points: 0 | Time: 0ms</div>
+            </div>
+        </div>
+        
+        <div class="algorithm-info">
+            <strong>New Color Scheme:</strong><br>
+            • <span style="color: #22c55e; font-weight: bold;">Green (#22c55e)</span> - Stem<br>
+            • <span style="color: #dc2626; font-weight: bold;">Bright Red (#dc2626)</span> - Main Spiral<br>
+            • <span style="color: #7c3aed; font-weight: bold;">Purple (#7c3aed)</span> - Left Branches<br>
+            • <span style="color: #ea580c; font-weight: bold;">Orange (#ea580c)</span> - Right Branches
+        </div>
+        
+        <div class="controls">
+            <div class="slider-container">
+                <label for="pointsSlider">
+                    Number of Points: 
+                    <span id="pointsValue" class="value-display">50000</span>
+                </label>
+                <input type="range" id="pointsSlider" min="10000" max="100000" step="10000" value="50000">
+            </div>
+            
+            <div class="slider-container">
+                <label for="thalesProbSlider">
+                    Thales Probability: 
+                    <span id="thalesProbValue" class="value-display">0.080</span>
+                </label>
+                <input type="range" id="thalesProbSlider" min="0" max="0.3" step="0.005" value="0.08">
+            </div>
+        </div>
+        
+        <div class="button-container">
+            <button id="generateBtn">🔄 Generate Both Ferns</button>
+            <button id="resetBtn">⚡ Reset to Default</button>
+            <button id="downloadBtn">💾 Download Comparison</button>
+        </div>
+        
+        <div class="info">
+            <p>💡 <strong>Comparison:</strong> The left shows the original Barnsley Fern using classic Chaos Game algorithm.</p>
+            <p>🎨 <strong>New Colors:</strong> Green, Bright Red, Purple, and Orange for different fern parts.</p>
+        </div>
+    </div>
+
+    <script>
+        class ClassicBarnsleyFern {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.numPoints = 50000;
+                this.points = [];
+                
+                // New color scheme
+                this.colors = [
+                    '#22c55e', // Green - Stem
+                    '#dc2626', // Bright Red - Main Spiral
+                    '#7c3aed', // Purple - Left Branches
+                    '#ea580c'  // Orange - Right Branches
+                ];
+                
+                // Classic Barnsley Fern transformations
+                this.transforms = [
+                    // f1: Stem (1%)
+                    { a: 0.00, b: 0.00, c: 0.00, d: 0.16, e: 0.00, f: 0.00, prob: 0.01 },
+                    // f2: Successive smaller leaflets (85%)
+                    { a: 0.85, b: 0.04, c: -0.04, d: 0.85, e: 0.00, f: 1.60, prob: 0.85 },
+                    // f3: Left leaflet (7%)
+                    { a: 0.20, b: -0.26, c: 0.23, d: 0.22, e: 0.00, f: 1.60, prob: 0.07 },
+                    // f4: Right leaflet (7%)
+                    { a: -0.15, b: 0.28, c: 0.26, d: 0.24, e: 0.00, f: 0.44, prob: 0.07 }
+                ];
+                
+                this.cumProbs = this.calculateCumulativeProbs();
+                this.init();
+            }
+            
+            calculateCumulativeProbs() {
+                let sum = 0;
+                return this.transforms.map(transform => {
+                    sum += transform.prob;
+                    return sum;
+                });
+            }
+            
+            init() {
+                this.generateFern();
+                this.drawFern();
+            }
+            
+            generateFern() {
+                const startTime = performance.now();
+                
+                const x = new Array(this.numPoints).fill(0);
+                const y = new Array(this.numPoints).fill(0);
+                
+                // Track which transform was used for coloring
+                const transformTypes = new Array(this.numPoints).fill(0);
+                
+                for (let i = 1; i < this.numPoints; i++) {
+                    const r = Math.random();
+                    let transformIndex = 0;
+                    
+                    // Select transformation based on probability
+                    for (let j = 0; j < this.cumProbs.length; j++) {
+                        if (r < this.cumProbs[j]) {
+                            transformIndex = j;
+                            break;
+                        }
+                    }
+                    
+                    transformTypes[i] = transformIndex;
+                    const transform = this.transforms[transformIndex];
+                    
+                    // Apply the affine transformation (classic Chaos Game)
+                    x[i] = transform.a * x[i-1] + transform.b * y[i-1] + transform.e;
+                    y[i] = transform.c * x[i-1] + transform.d * y[i-1] + transform.f;
+                }
+                
+                this.points = x.map((xi, i) => ({
+                    x: xi, 
+                    y: y[i], 
+                    transformType: transformTypes[i]
+                }));
+                
+                const endTime = performance.now();
+                return endTime - startTime;
+            }
+            
+            drawFern() {
+                // Clear canvas with light background
+                this.ctx.fillStyle = '#f8fafc';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Transform coordinates to fit canvas
+                const scale = 50;
+                const offsetX = this.canvas.width / 2;
+                const offsetY = this.canvas.height - 50;
+                
+                // Draw points with new vibrant colors
+                this.points.forEach(point => {
+                    const screenX = offsetX + point.x * scale;
+                    const screenY = offsetY - point.y * scale;
+                    
+                    if (screenX >= 0 && screenX < this.canvas.width && 
+                        screenY >= 0 && screenY < this.canvas.height) {
+                        
+                        // Use the new color scheme
+                        this.ctx.fillStyle = this.colors[point.transformType];
+                        this.ctx.fillRect(screenX, screenY, 1.2, 1.2);
+                    }
+                });
+                
+                // Draw title
+                this.ctx.fillStyle = '#1e293b';
+                this.ctx.font = 'bold 14px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('Classic Chaos Game Algorithm', this.canvas.width / 2, 20);
+            }
+        }
+
+        class ThalesBarnsleyFern {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.numPoints = 50000;
+                this.thales_prob = 0.08;
+                this.t_inv = 0.01;
+                this.points = [];
+                
+                // Same vibrant color scheme
+                this.colors = [
+                    '#22c55e', // Green - Stem
+                    '#dc2626', // Bright Red - Main Spiral
+                    '#7c3aed', // Purple - Left Branches
+                    '#ea580c'  // Orange - Right Branches
+                ];
+                
+                // Same base transformations as classic version
+                this.transforms = [
+                    { a: 0.00, b: 0.00, c: 0.00, d: 0.16, e: 0.00, f: 0.00, prob: 0.01 },
+                    { a: 0.85, b: 0.04, c: -0.04, d: 0.85, e: 0.00, f: 1.60, prob: 0.85 },
+                    { a: 0.20, b: -0.26, c: 0.23, d: 0.22, e: 0.00, f: 1.60, prob: 0.07 },
+                    { a: -0.15, b: 0.28, c: 0.26, d: 0.24, e: 0.00, f: 0.44, prob: 0.07 }
+                ];
+                
+                this.cumProbs = this.calculateCumulativeProbs();
+                this.init();
+            }
+            
+            calculateCumulativeProbs() {
+                let sum = 0;
+                return this.transforms.map(transform => {
+                    sum += transform.prob;
+                    return sum;
+                });
+            }
+            
+            init() {
+                this.generateFern();
+                this.drawFern();
+            }
+            
+            generateFern() {
+                const startTime = performance.now();
+                
+                const x = new Array(this.numPoints).fill(0);
+                const y = new Array(this.numPoints).fill(0);
+                const noiseScale = 0.002;
+                
+                const transformTypes = new Array(this.numPoints).fill(0);
+                
+                for (let i = 1; i < this.numPoints; i++) {
+                    const r = Math.random();
+                    let transformIndex = 0;
+                    
+                    for (let j = 0; j < this.cumProbs.length; j++) {
+                        if (r < this.cumProbs[j]) {
+                            transformIndex = j;
+                            break;
+                        }
+                    }
+                    
+                    transformTypes[i] = transformIndex;
+                    const transform = this.transforms[transformIndex];
+                    
+                    // Apply base transformation
+                    const xTemp = transform.a * x[i-1] + transform.b * y[i-1] + transform.e;
+                    const yTemp = transform.c * x[i-1] + transform.d * y[i-1] + transform.f;
+                    
+                    // Apply Thales modification with probability
+                    if (i > 1 && Math.random() < this.thales_prob) {
+                        x[i] = (1 - this.t_inv) * xTemp + this.t_inv * x[i-1] + this.gaussianRandom(0, noiseScale);
+                        y[i] = (1 - this.t_inv) * yTemp + this.t_inv * y[i-1] + this.gaussianRandom(0, noiseScale);
+                    } else {
+                        x[i] = xTemp + this.gaussianRandom(0, noiseScale);
+                        y[i] = yTemp + this.gaussianRandom(0, noiseScale);
+                    }
+                }
+                
+                this.points = x.map((xi, i) => ({
+                    x: xi, 
+                    y: y[i], 
+                    transformType: transformTypes[i]
+                }));
+                
+                const endTime = performance.now();
+                return endTime - startTime;
+            }
+            
+            gaussianRandom(mean, std) {
+                let u = 0, v = 0;
+                while(u === 0) u = Math.random();
+                while(v === 0) v = Math.random();
+                return mean + std * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+            
+            drawFern() {
+                // Clear canvas with light background
+                this.ctx.fillStyle = '#f8fafc';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                const scale = 50;
+                const offsetX = this.canvas.width / 2;
+                const offsetY = this.canvas.height - 50;
+                
+                // Draw points with vibrant colors
+                this.points.forEach(point => {
+                    const screenX = offsetX + point.x * scale;
+                    const screenY = offsetY - point.y * scale;
+                    
+                    if (screenX >= 0 && screenX < this.canvas.width && 
+                        screenY >= 0 && screenY < this.canvas.height) {
+                        
+                        this.ctx.fillStyle = this.colors[point.transformType];
+                        this.ctx.fillRect(screenX, screenY, 1.2, 1.2);
+                    }
+                });
+                
+                this.ctx.fillStyle = '#1e293b';
+                this.ctx.font = 'bold 14px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('Thales-Modified Algorithm', this.canvas.width / 2, 20);
+            }
+            
+            updateParameters(thales_prob) {
+                this.thales_prob = parseFloat(thales_prob);
+            }
+        }
+
+        // Initialize both ferns
+        document.addEventListener('DOMContentLoaded', function() {
+            const classicFern = new ClassicBarnsleyFern('classicCanvas');
+            const thalesFern = new ThalesBarnsleyFern('thalesCanvas');
+            
+            function generateBoth() {
+                const points = parseInt(document.getElementById('pointsSlider').value);
+                const thalesProb = parseFloat(document.getElementById('thalesProbSlider').value);
+                
+                classicFern.numPoints = points;
+                thalesFern.numPoints = points;
+                thalesFern.updateParameters(thalesProb);
+                
+                const classicTime = classicFern.generateFern();
+                const thalesTime = thalesFern.generateFern();
+                
+                classicFern.drawFern();
+                thalesFern.drawFern();
+                
+                document.getElementById('classicStats').textContent = 
+                    `Points: ${points.toLocaleString()} | Time: ${classicTime.toFixed(0)}ms`;
+                document.getElementById('thalesStats').textContent = 
+                    `Points: ${points.toLocaleString()} | Time: ${thalesTime.toFixed(0)}ms`;
+                
+                updateSliderDisplays();
+            }
+            
+            function updateSliderDisplays() {
+                document.getElementById('pointsValue').textContent = 
+                    parseInt(document.getElementById('pointsSlider').value).toLocaleString();
+                document.getElementById('thalesProbValue').textContent = 
+                    parseFloat(document.getElementById('thalesProbSlider').value).toFixed(3);
+            }
+            
+            // Event listeners
+            let updateTimeout;
+            function debouncedUpdate() {
+                clearTimeout(updateTimeout);
+                updateTimeout = setTimeout(generateBoth, 300);
+            }
+            
+            document.getElementById('pointsSlider').addEventListener('input', debouncedUpdate);
+            document.getElementById('thalesProbSlider').addEventListener('input', debouncedUpdate);
+            
+            document.getElementById('generateBtn').addEventListener('click', generateBoth);
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                document.getElementById('pointsSlider').value = 50000;
+                document.getElementById('thalesProbSlider').value = 0.08;
+                generateBoth();
+            });
+            
+            document.getElementById('downloadBtn').addEventListener('click', function() {
+                // Create a combined image
+                const combinedCanvas = document.createElement('canvas');
+                combinedCanvas.width = 1000;
+                combinedCanvas.height = 600;
+                const ctx = combinedCanvas.getContext('2d');
+                
+                // Draw background
+                ctx.fillStyle = '#f8fafc';
+                ctx.fillRect(0, 0, combinedCanvas.width, combinedCanvas.height);
+                
+                // Draw classic fern on left
+                ctx.drawImage(classicFern.canvas, 0, 0);
+                // Draw thales fern on right
+                ctx.drawImage(thalesFern.canvas, 500, 0);
+                
+                // Add title
+                ctx.fillStyle = '#1e293b';
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Barnsley Fern Comparison - Vibrant Colors', 500, 30);
+                
+                const link = document.createElement('a');
+                link.download = `barnsley_fern_vibrant_${Date.now()}.png`;
+                link.href = combinedCanvas.toDataURL();
+                link.click();
+            });
+            
+            // Initial generation
+            generateBoth();
+        });
+    </script>
+</body>
+</html>
