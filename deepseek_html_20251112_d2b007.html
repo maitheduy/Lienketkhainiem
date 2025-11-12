@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Barnsley Fern - Correct Multi-Branch Version</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        .canvas-container {
+            text-align: center;
+            margin: 20px 0;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+        }
+        canvas {
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 5px;
+        }
+        .controls {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .slider-container {
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #495057;
+        }
+        input[type="range"] {
+            width: 100%;
+            max-width: 600px;
+            height: 8px;
+            border-radius: 4px;
+            background: #dee2e6;
+            outline: none;
+        }
+        .value-display {
+            display: inline-block;
+            margin-left: 10px;
+            font-weight: bold;
+            color: #007bff;
+            background: #e7f3ff;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.9em;
+        }
+        .button-container {
+            text-align: center;
+            margin: 30px 0;
+        }
+        button {
+            padding: 12px 25px;
+            margin: 0 10px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        }
+        .info {
+            text-align: center;
+            color: #6c757d;
+            margin-top: 20px;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .stats {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 0.9em;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .transform-info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌿 Interactive Barnsley Fern - Multi-Branch Version</h1>
+        <div class="subtitle">Classic fractal fern with symmetrical branches on both sides</div>
+        
+        <div class="canvas-container">
+            <canvas id="fernCanvas" width="800" height="600"></canvas>
+            <div class="stats" id="stats">Points: 0 | Time: 0ms</div>
+        </div>
+        
+        <div class="transform-info">
+            <strong>Transformations:</strong><br>
+            • f1 (1%): Stem<br>
+            • f2 (85%): Main spiral/small leaflets<br>
+            • f3 (7%): Left branches<br>
+            • f4 (7%): Right branches
+        </div>
+        
+        <div class="controls">
+            <div class="slider-container">
+                <label for="tInvSlider">
+                    Blur Strength (t_inv): 
+                    <span id="tInvValue" class="value-display">0.010</span>
+                </label>
+                <input type="range" id="tInvSlider" min="0" max="0.1" step="0.001" value="0.01">
+            </div>
+            
+            <div class="slider-container">
+                <label for="thalesProbSlider">
+                    Thales Probability (thales_prob): 
+                    <span id="thalesProbValue" class="value-display">0.080</span>
+                </label>
+                <input type="range" id="thalesProbSlider" min="0" max="0.3" step="0.005" value="0.08">
+            </div>
+
+            <div class="slider-container">
+                <label for="pointsSlider">
+                    Number of Points: 
+                    <span id="pointsValue" class="value-display">50000</span>
+                </label>
+                <input type="range" id="pointsSlider" min="10000" max="100000" step="10000" value="50000">
+            </div>
+        </div>
+        
+        <div class="button-container">
+            <button id="generateBtn">🔄 Generate New Fern</button>
+            <button id="resetBtn">⚡ Reset to Default</button>
+            <button id="downloadBtn">💾 Download Image</button>
+        </div>
+        
+        <div class="info">
+            <p>💡 <strong>Tip:</strong> The classic Barnsley Fern should have symmetrical branches on both sides</p>
+            <p>🎚️ Adjust parameters to explore different fractal patterns</p>
+        </div>
+    </div>
+
+    <script>
+        class BarnsleyFern {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.numPoints = 50000;
+                this.t_inv = 0.01;
+                this.thales_prob = 0.08;
+                this.points = [];
+                
+                this.init();
+            }
+            
+            init() {
+                this.generateFern();
+                this.drawFern();
+            }
+            
+            generateFern() {
+                const startTime = performance.now();
+                
+                const x = new Array(this.numPoints).fill(0);
+                const y = new Array(this.numPoints).fill(0);
+                
+                // CORRECT Barnsley Fern transformations
+                const transforms = [
+                    // f1: Stem
+                    [0.00, 0.00, 0.00, 0.16, 0.00, 0.00, 0.01],
+                    // f2: Successive smaller leaflets
+                    [0.85, 0.04, -0.04, 0.85, 0.00, 1.60, 0.85],
+                    // f3: Left leaflet - FIXED parameters
+                    [0.20, -0.26, 0.23, 0.22, 0.00, 1.60, 0.07],
+                    // f4: Right leaflet - FIXED parameters  
+                    [-0.15, 0.28, 0.26, 0.24, 0.00, 0.44, 0.07]
+                ];
+                
+                const cumProbs = [0.01, 0.86, 0.93, 1.00]; // Cumulative probabilities
+                
+                const noiseScale = 0.002;
+                
+                // Track which transform was used for each point
+                const transformTypes = new Array(this.numPoints).fill(0);
+                
+                for (let i = 1; i < this.numPoints; i++) {
+                    const r = Math.random();
+                    let transformIndex;
+                    
+                    if (r < cumProbs[0]) {
+                        transformIndex = 0; // Stem
+                    } else if (r < cumProbs[1]) {
+                        transformIndex = 1; // Main spiral
+                    } else if (r < cumProbs[2]) {
+                        transformIndex = 2; // Left branches
+                    } else {
+                        transformIndex = 3; // Right branches
+                    }
+                    
+                    transformTypes[i] = transformIndex;
+                    const [a, b, c, d, e, f] = transforms[transformIndex];
+                    
+                    // Apply the transformation
+                    x[i] = a * x[i-1] + b * y[i-1] + e;
+                    y[i] = c * x[i-1] + d * y[i-1] + f;
+                    
+                    // Apply Thales modification with probability
+                    if (i > 1 && Math.random() < this.thales_prob) {
+                        x[i] = (1 - this.t_inv) * x[i] + this.t_inv * x[i-1] + this.gaussianRandom(0, noiseScale);
+                        y[i] = (1 - this.t_inv) * y[i] + this.t_inv * y[i-1] + this.gaussianRandom(0, noiseScale);
+                    } else {
+                        x[i] += this.gaussianRandom(0, noiseScale);
+                        y[i] += this.gaussianRandom(0, noiseScale);
+                    }
+                }
+                
+                this.points = x.map((xi, i) => ({
+                    x: xi, 
+                    y: y[i], 
+                    transformType: transformTypes[i]
+                }));
+                
+                const endTime = performance.now();
+                this.updateStats(endTime - startTime);
+            }
+            
+            gaussianRandom(mean, std) {
+                let u = 0, v = 0;
+                while(u === 0) u = Math.random();
+                while(v === 0) v = Math.random();
+                return mean + std * Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+            }
+            
+            drawFern() {
+                // Clear canvas
+                this.ctx.fillStyle = '#ffffff';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+                
+                // Transform coordinates
+                const scale = 50;
+                const offsetX = this.canvas.width / 2;
+                const offsetY = this.canvas.height - 50;
+                
+                // Draw points with colors based on transform type
+                this.points.forEach(point => {
+                    const screenX = offsetX + point.x * scale;
+                    const screenY = offsetY - point.y * scale;
+                    
+                    if (screenX >= 0 && screenX < this.canvas.width && 
+                        screenY >= 0 && screenY < this.canvas.height) {
+                        
+                        // Color coding for different parts
+                        switch(point.transformType) {
+                            case 0: // Stem - dark green
+                                this.ctx.fillStyle = '#006400';
+                                break;
+                            case 1: // Main spiral - green
+                                this.ctx.fillStyle = '#228B22';
+                                break;
+                            case 2: // Left branches - light green
+                                this.ctx.fillStyle = '#32CD32';
+                                break;
+                            case 3: // Right branches - lime green
+                                this.ctx.fillStyle = '#90EE90';
+                                break;
+                        }
+                        
+                        this.ctx.fillRect(screenX, screenY, 1.2, 1.2);
+                    }
+                });
+                
+                // Draw title
+                this.ctx.fillStyle = '#2c3e50';
+                this.ctx.font = 'bold 18px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText(
+                    'Barnsley Fern - Multi-Branch Version', 
+                    this.canvas.width / 2, 
+                    30
+                );
+            }
+            
+            updateStats(generationTime) {
+                const statsElement = document.getElementById('stats');
+                statsElement.textContent = 
+                    `Points: ${this.numPoints.toLocaleString()} | ` +
+                    `Generation Time: ${generationTime.toFixed(0)}ms`;
+            }
+            
+            updateParameters(t_inv, thales_prob, numPoints) {
+                this.t_inv = parseFloat(t_inv);
+                this.thales_prob = parseFloat(thales_prob);
+                this.numPoints = parseInt(numPoints);
+                this.generateFern();
+                this.drawFern();
+                this.updateSliderDisplays();
+            }
+            
+            resetToDefault() {
+                this.t_inv = 0.01;
+                this.thales_prob = 0.08;
+                this.numPoints = 50000;
+                this.generateFern();
+                this.drawFern();
+                this.updateSliderDisplays();
+            }
+            
+            downloadImage() {
+                const link = document.createElement('a');
+                const filename = `barnsley_fern_${Date.now()}.png`;
+                link.download = filename;
+                link.href = this.canvas.toDataURL();
+                link.click();
+            }
+            
+            updateSliderDisplays() {
+                document.getElementById('tInvValue').textContent = this.t_inv.toFixed(3);
+                document.getElementById('thalesProbValue').textContent = this.thales_prob.toFixed(3);
+                document.getElementById('pointsValue').textContent = this.numPoints.toLocaleString();
+                document.getElementById('tInvSlider').value = this.t_inv;
+                document.getElementById('thalesProbSlider').value = this.thales_prob;
+                document.getElementById('pointsSlider').value = this.numPoints;
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            const fern = new BarnsleyFern('fernCanvas');
+            
+            // Update function
+            function updateFern() {
+                const t_inv = parseFloat(document.getElementById('tInvSlider').value);
+                const thales_prob = parseFloat(document.getElementById('thalesProbSlider').value);
+                const numPoints = parseInt(document.getElementById('pointsSlider').value);
+                fern.updateParameters(t_inv, thales_prob, numPoints);
+            }
+            
+            // Slider event listeners with debouncing
+            let updateTimeout;
+            function debouncedUpdate() {
+                clearTimeout(updateTimeout);
+                updateTimeout = setTimeout(updateFern, 200);
+            }
+            
+            document.getElementById('tInvSlider').addEventListener('input', function(e) {
+                document.getElementById('tInvValue').textContent = parseFloat(e.target.value).toFixed(3);
+                debouncedUpdate();
+            });
+            
+            document.getElementById('thalesProbSlider').addEventListener('input', function(e) {
+                document.getElementById('thalesProbValue').textContent = parseFloat(e.target.value).toFixed(3);
+                debouncedUpdate();
+            });
+            
+            document.getElementById('pointsSlider').addEventListener('input', function(e) {
+                document.getElementById('pointsValue').textContent = parseInt(e.target.value).toLocaleString();
+                debouncedUpdate();
+            });
+            
+            // Button event listeners
+            document.getElementById('generateBtn').addEventListener('click', updateFern);
+            document.getElementById('resetBtn').addEventListener('click', function() {
+                fern.resetToDefault();
+            });
+            document.getElementById('downloadBtn').addEventListener('click', function() {
+                fern.downloadImage();
+            });
+        });
+    </script>
+</body>
+</html>
