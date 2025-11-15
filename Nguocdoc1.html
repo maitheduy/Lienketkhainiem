@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MN – P Song Song Double Cone</title>
+<style>
+body{
+  margin:0;background:#0e1525;color:#e7eef7;
+  font-family:'Inter',sans-serif;
+}
+h2{margin:0 0 6px;font-size:18px}
+.wrap{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:14px;padding:16px;
+}
+.panel{
+  padding:12px;background:rgba(255,255,255,0.03);
+  border-radius:10px;box-shadow:0 4px 10px rgba(0,0,0,0.4)
+}
+svg{width:100%;height:480px;background:rgba(255,255,255,0.02);border-radius:8px}
+label{font-size:13px;color:#aab7d6}
+input[type=range]{width:100%}
+.control-block{margin-top:10px}
+.info{
+  margin-top:10px;padding:10px;background:rgba(255,255,255,0.02);
+  border-left:3px solid #38bdf8;border-radius:6px;font-size:13px;color:#d1e7ff
+}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<!-- =====================================
+     PANEL 1 — Tam giác ABC – MN – P
+====================================== -->
+<div class="panel">
+  <h2>Tam giác ABC – MN – điểm P (nồng độ trung bình)</h2>
+  <svg id="triSvg" viewBox="0 0 700 520">
+    <g id="triScene"></g>
+  </svg>
+
+  <div class="control-block">
+    <label>k = AM/MB: <span id="kVal">1</span></label>
+    <input id="k" type="range" min="0.1" max="8" step="0.01" value="1">
+
+    <label>l = AN/NC: <span id="lVal">1</span></label>
+    <input id="l" type="range" min="0.1" max="8" step="0.01" value="1">
+  </div>
+
+  <div class="info">
+    Khi <strong>k = l</strong>, M và N chia AB và AC theo cùng tỉ số,  
+    nên <strong>MN ∥ BC</strong> (Định lý Ta-lét).  
+    P là trung bình có trọng số của hai nồng độ tương ứng hai đoạn chia.
+  </div>
+</div>
+
+
+
+<!-- =====================================
+     PANEL 2 — Con lăn DOUBLE-CONE lăn ngược dốc
+====================================== -->
+<div class="panel">
+  <h2>Con lăn Double Cone lăn "ngược dốc"</h2>
+
+  <svg id="coneSvg" viewBox="0 0 600 460">
+    <g id="coneScene"></g>
+  </svg>
+
+  <div class="control-block">
+    <label>Độ nghiêng dốc: <span id="slopeVal">0.4</span></label>
+    <input id="slope" type="range" min="0.1" max="0.8" step="0.01" value="0.4">
+
+    <label>Độ mở hai ray: <span id="spreadVal">0.6</span></label>
+    <input id="spread" type="range" min="0.3" max="1.2" step="0.01" value="0.6">
+  </div>
+
+  <div class="info">
+    Double cone có thể lăn "ngược dốc" vì khối tâm (CM) thật ra  
+    đang <strong>đi xuống</strong> khi điểm tiếp xúc dịch chuyển ra hai ray rộng hơn.  
+    CM ≈ "điểm P" trong mô hình trái: đều là trung bình có trọng số.
+  </div>
+</div>
+
+</div>
+
+
+<!-- =====================================
+     JAVASCRIPT
+====================================== -->
+<script>
+// ===========================================================
+// PART 1 — Tam giác ABC – MN – P
+// ===========================================================
+const triScene = document.getElementById("triScene");
+const kInput = document.getElementById("k");
+const lInput = document.getElementById("l");
+const kVal = document.getElementById("kVal");
+const lVal = document.getElementById("lVal");
+
+function svgEl(tag, attrs){
+  const e=document.createElementNS("http://www.w3.org/2000/svg",tag);
+  for(const k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function dist(a,b){return Math.hypot(a.x-b.x, a.y-b.y);}
+
+function drawTriangle(){
+  triScene.innerHTML = "";
+
+  const A={x:120,y:420}, B={x:580,y:420}, C={x:200,y:120};
+  const k=+kInput.value, l=+lInput.value;
+  kVal.textContent = k.toFixed(2);
+  lVal.textContent = l.toFixed(2);
+
+  const alphaM = k/(k+1);
+  const alphaN = l/(l+1);
+
+  const M={x:A.x+(B.x-A.x)*alphaM, y:A.y+(B.y-A.y)*alphaM};
+  const N={x:A.x+(C.x-A.x)*alphaN, y:A.y+(C.y-A.y)*alphaN};
+
+  const AB=dist(A,B), AC=dist(A,C);
+  const w1=AB/(AB+AC), w2=1-w1;
+  const alphaW = w1*alphaM + w2*alphaN;
+
+  let t;
+  if(Math.abs(alphaN-alphaM)<1e-9) t=0.5;
+  else t = (alphaW - alphaM)/(alphaN-alphaM);
+  t=Math.max(0,Math.min(1,t));
+
+  const P={x:M.x+(N.x-M.x)*t, y:M.y+(N.y-M.y)*t};
+
+  // Tam giác
+  triScene.appendChild(svgEl("line",{x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke:"#3498db","stroke-width":2}));
+  triScene.appendChild(svgEl("line",{x1:A.x,y1:A.y,x2:C.x,y2:C.y,stroke:"#5dade2","stroke-width":2}));
+  triScene.appendChild(svgEl("line",{x1:B.x,y1:B.y,x2:C.x,y2:C.y,stroke:"#154360","stroke-width":2,"stroke-dasharray":"6 6"}));
+
+  // M,N,P
+  [[M,"M","#f39c12"],[N,"N","#f39c12"],[P,"P","#f4d03f"]].forEach(([pt,lab,col])=>{
+    triScene.appendChild(svgEl("circle",{cx:pt.x,cy:pt.y,r:6,fill:col}));
+    triScene.appendChild(svgEl("text",{x:pt.x+10,y:pt.y,fill:"#fff","font-size":14}).appendChild(document.createTextNode(lab)));
+  });
+
+  // MN
+  triScene.appendChild(svgEl("line",{x1:M.x,y1:M.y,x2:N.x,y2:N.y,stroke:"#f8c471","stroke-width":3}));
+
+  if(Math.abs(k-l)<1e-3){
+    const T=svgEl("text",{x:350,y:40,"text-anchor":"middle",fill:"#aef2c7","font-size":15});
+    T.textContent="k = l → MN ∥ BC (Ta-lét)";
+    triScene.appendChild(T);
+  }
+}
+drawTriangle();
+kInput.oninput = lInput.oninput = drawTriangle;
+
+
+
+// ===========================================================
+// PART 2 — Double Cone rolling uphill
+// ===========================================================
+const coneScene = document.getElementById("coneScene");
+const slopeInput = document.getElementById("slope");
+const spreadInput = document.getElementById("spread");
+const slopeVal = document.getElementById("slopeVal");
+const spreadVal = document.getElementById("spreadVal");
+
+let coneX = 80;  // vị trí dọc ray
+let dir = 1;     // hướng lăn
+
+function drawCone(){
+  coneScene.innerHTML="";
+
+  const slope=+slopeInput.value;   // độ nghiêng ray
+  const spread=+spreadInput.value; // độ mở
+  slopeVal.textContent=slope.toFixed(2);
+  spreadVal.textContent=spread.toFixed(2);
+
+  // Hai thanh ray
+  const y0=350;
+  const leftRay  = x => y0 - slope*x;
+  const rightRay = x => y0 - slope*x - spread*80;
+
+  // Vẽ ray
+  for(let x=0;x<500;x+=1){
+    coneScene.appendChild(svgEl("circle",{cx:x,cy:leftRay(x),r:0.7,fill:"#88c2ff"}));
+    coneScene.appendChild(svgEl("circle",{cx:x+80,cy:rightRay(x),r:0.7,fill:"#88c2ff"}));
+  }
+
+  // Tính vị trí double cone
+  const xc = coneX;
+  const yl = leftRay(xc);
+  const yr = rightRay(xc+80);
+
+  const yMid = (yl + yr)/2;
+
+  // Thân double cone (hình chiếu)
+  coneScene.appendChild(svgEl("ellipse",{
+    cx: xc+40, cy:yMid, rx:35, ry:14,
+    fill:"#f4d03f", stroke:"#b7950b","stroke-width":2
+  }));
+
+  // CM – khối tâm
+  coneScene.appendChild(svgEl("circle",{cx:xc+40,cy:yMid,r:5,fill:"#e74c3c"}));
+  coneScene.appendChild(svgEl("text",{x:xc+55,y:yMid-5,fill:"#fff","font-size":13}).appendChild(document.createTextNode("CM")));
+
+  // Animation đơn giản
+  coneX += dir*0.8;
+  if(coneX<40) dir=1;
+  if(coneX>420) dir=-1;
+
+  requestAnimationFrame(drawCone);
+}
+drawCone();
+</script>
+
+</body>
+</html>
